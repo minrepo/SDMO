@@ -1,4 +1,4 @@
-"""Testmodule for project1developers.py"""
+"""Tests for project1developers.py"""
 import unittest
 import os
 import csv
@@ -249,6 +249,57 @@ class TestTestProject1Developers(unittest.TestCase):
         })
         p1d.save_similarity_df(df, t=0.7, outputfile="test")
         self.assertTrue(os.path.exists("project1devs/test_similarity_t=0.7.csv"))
+
+    def test_parse_args_defaults(self):
+        """Test default arguments when no CLI args are provided."""
+        with patch('sys.argv', ['project1developers.py']):
+            args = p1d.parse_args()
+            self.assertEqual(args.threshold, 0.7)
+            self.assertEqual(args.file, 'devs')
+            self.assertIsNone(args.repo)
+
+    def test_parse_args_file_and_threshold(self):
+        """Test parsing of both file and threshold arguments."""
+        with patch('sys.argv', ['project1developers.py', '--threshold', '0.9', '-f', 'testfile']):
+            args = p1d.parse_args()
+            self.assertEqual(args.threshold, 0.9)
+            self.assertEqual(args.file, 'testfile')
+            self.assertIsNone(args.repo)
+
+    @patch("project1developers.read_developers")
+    @patch("project1developers.os.path.exists")
+    def test_fetch_or_read_from_csv(self, mock_exists, mock_read):
+        """Test reading developers from an existing CSV."""
+        mock_exists.return_value = True
+        mock_read.return_value = [("Erkki", "erkki@esimerkki.com")]
+
+        devs = p1d.fetch_or_read_developers("devs")
+        self.assertEqual(devs, [("Erkki", "erkki@esimerkki.com")])
+        mock_read.assert_called_once_with("devs")
+
+    @patch("project1developers.load_developers_from_repo")
+    @patch("project1developers.read_developers")
+    def test_fetch_or_read_from_repo(self, mock_read, mock_load):
+        """Test fetching developers from a repo."""
+        mock_load.return_value = None
+        mock_read.return_value = [("Erkki", "erkki@esimerkki.com")]
+
+        devs = p1d.fetch_or_read_developers("devs", repo_url="https://notrealrepo")
+        self.assertEqual(devs, [("Erkki", "erkki@esimerkki.com")])
+        mock_load.assert_called_once_with("https://notrealrepo", "devs")
+        mock_read.assert_called_once_with("devs")
+
+    @patch("project1developers.load_developers_from_repo")
+    @patch("project1developers.os.path.exists")
+    @patch("project1developers.logging")
+    def test_fetch_or_read_failure(self, mock_logging, mock_exists, mock_load):
+        """Return empty list if repo fails or CSV does not exist."""
+        mock_load.side_effect = Exception("repo failed")
+        mock_exists.return_value = False
+
+        devs = p1d.fetch_or_read_developers("devs", repo_url="https://notrealrepo")
+        self.assertEqual(devs, [])
+        mock_logging.error.assert_called_once()
 
 if __name__ == "__main__":
     unittest.main()
