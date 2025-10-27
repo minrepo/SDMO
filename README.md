@@ -13,19 +13,19 @@ The code has been refactored, added logging, and modified logic: developers are 
 
 ## Contents
 
-project1devs/: Directory with data for Project 1
+- **project1devs/** — Directory containing data files for project  
+  - **devs.csv**: List of developers mined from Dify  
+  - **devs_similarity.csv**: Similarity tests for each pair of developers (Dify)  
+  - **devs_similarity_t=0.9.csv**: Similarity tests for each pair of developers (Dify) with similarity threshold 0.9  
 
-- `**devs.csv**``: List of developers mined from Dify  
-- **devs_similarity.csv**: Similarity tests for each pair of developers (Dify)  
-- **devs_similarity_t=0.9.csv**: Similarity tests for each pair of developers (Dify) with similarity threshold 0.9  
-
-- **devs2.csv**: List of developers mined from Immich  
-- **devs2_similarity.csv**: Similarity tests for each pair of developers (Immich)  
-- **devs2_similarity_t=0.95.csv**: Similarity tests for each pair of developers (Immich) with similarity threshold 0.95  
+  - **devs2.csv**: List of developers mined from Immich  
+  - **devs2_similarity.csv**: Similarity tests for each pair of developers (Immich)  
+  - **devs2_similarity_t=0.95.csv**: Similarity tests for each pair of developers (Immich) with similarity threshold 0.95  
 
 - **project1developers.py**: Script for mining developer information and determining duplicate developers  
+- **requirements.txt**: List of used libraries with specified versions 
 - **test_project1developers.py**: Test module for `project1developers.py`  
-- **requirements.txt**: List of used libraries with specified versions  
+ 
 
 ## Features
 
@@ -43,13 +43,15 @@ pip install -r requirements.txt
 ```
 ## Running the Script
 
-The script can either fetch developer data from a Git repository or read an existing CSV file in the project1devs/ folder. By default, it reads devs.csv and uses a similarity threshold of 0.7.
+The script can either fetch developer data from a Git repository or read an existing CSV file in the `project1devs/` folder. By default, it reads devs.csv and uses a similarity threshold of 0.7.
 
 ### To see available command-line options:
 
 ```bash
 python project1developers.py --help
 ```
+You can also use -h as a shortcut.
+
 ### Example Runs
 
 #### Run with default settings (read devs.csv, threshold 0.7):
@@ -61,17 +63,21 @@ python project1developers.py
 #### Specify a similarity threshold and/or output file prefix:
 
 ```bash
-python project1developers.py -t 0.85 -f results
+python project1developers.py -t 0.85 -f devs2
 ```
+**Note**: The -f (or --file) option specifies also the prefix of the input CSV file in the project1devs/ folder.
+The file must already exist; otherwise, an error will occur.
+
+
 #### Fetch developer data from a GitHub repository: 
 
-This repository was used in the project, and devs.csv will contain the developers from this repository:
+This repository was used in the project, and devs.csv contains the developers from this repository:
 
 ```bash
 python project1developers.py -r https://github.com/langgenius/dify
 ```
 
-This is the second analyzed repository. Its developers will be saved in devs2.csv. You can also specify the output file prefix and threshold directly:
+This is the second analyzed repository. Its developers are saved in devs2.csv. You can also specify the output file prefix and threshold directly:
 
 ```bash
 python project1developers.py -r https://github.com/immich-app/immich -t 0.9 -f devs2
@@ -103,8 +109,14 @@ You can run the tests:
 ```bash
 python -m unittest discover
 ```
+### Measuring test coverage
 
-If you want to measure test coverage, you can run:
+To measure test coverage, first install coverage.py:
+
+```bash
+pip install coverage
+```
+Then run the tests and generate a coverage report:
 
 ```bash
 coverage run -m unittest discover
